@@ -1,0 +1,31 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion 35
+    namespace "com.chamsswitch.hasham.flutter"
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    defaultConfig {
+        minSdkVersion 24
+    }
+}
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    compileOnly "io.flutter:flutter_embedding_debug:1.0.0-2accd7f3cc"
+    implementation "com.chamsswitch.hasham:hasham-mobile-sdk:0.1.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
+}

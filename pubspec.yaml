@@ -1,0 +1,27 @@
+name: hasham_mobile_sdk
+description: Flutter plugin for the Chamsswitch Hasham Mobile SDK — hardware-backed device attestation and PCI DSS-compliant PIN management.
+version: 0.2.1-snapshot+ce3db0f
+homepage: https://github.com/PelPay/iam
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.chamsswitch.hasham.flutter
+        pluginClass: HashamMobileSdkPlugin
+      ios:
+        pluginClass: HashamMobileSdkPlugin
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
