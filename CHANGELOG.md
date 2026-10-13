@@ -5,7 +5,7 @@ Follows [Keep a Changelog](https://keepachangelog.com/) and [Semantic Versioning
 
 ---
 
-## [0.2.1-snapshot+2d129f8] - 2026-10-13
+## [0.2.1-snapshot] - 2026-10-13
 
 ### Added
 - `HashamMobileSDK.extractChallenge(enrollmentToken)` — pure-Dart JWT parser that extracts the

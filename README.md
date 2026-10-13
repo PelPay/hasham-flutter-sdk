@@ -20,7 +20,7 @@ dependencies:
   hasham_mobile_sdk:
     git:
       url: https://github.com/PelPay/hasham-flutter-sdk.git
-      ref: 0.2.1-snapshot+<sha>
+      ref: 0.2.1-snapshot
 ```
 
 **Beta / Release** — published to [pub.dev](https://pub.dev/packages/hasham_mobile_sdk):
