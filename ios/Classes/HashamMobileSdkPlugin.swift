@@ -62,13 +62,14 @@ public class HashamMobileSdkPlugin: NSObject, FlutterPlugin {
                 result(FlutterError(code: "INVALID_PARAMS", message: "pan is required", details: nil))
                 return
             }
+            let captureTheme = pinTheme(from: args?["theme"] as? [String: Any])
             Task { @MainActor in
                 guard let vc = self.topViewController() else {
                     result(FlutterError(code: "NO_VIEW_CONTROLLER", message: "No view controller to present from", details: nil))
                     return
                 }
                 do {
-                    let block = try await self.hasham.capturePIN(from: vc, pan: pan)
+                    let block = try await self.hasham.capturePIN(from: vc, pan: pan, theme: captureTheme)
                     result(block.hex)
                 } catch {
                     result(self.flutterError(from: error))
@@ -77,6 +78,7 @@ public class HashamMobileSdkPlugin: NSObject, FlutterPlugin {
 
         case "changePIN":
             let cardType = args?["cardType"] as? String ?? "virtual"
+            let changeTheme = pinTheme(from: args?["theme"] as? [String: Any])
             Task { @MainActor in
                 guard let vc = self.topViewController() else {
                     result(FlutterError(code: "NO_VIEW_CONTROLLER", message: "No view controller to present from", details: nil))
@@ -90,13 +92,13 @@ public class HashamMobileSdkPlugin: NSObject, FlutterPlugin {
                             result(FlutterError(code: "INVALID_PARAMS", message: "pan is required for virtual cards", details: nil))
                             return
                         }
-                        changed = try await self.hasham.changePIN(from: vc, pan: pan)
+                        changed = try await self.hasham.changePIN(from: vc, pan: pan, theme: changeTheme)
                     case "physical":
                         guard let maskedPan = args?["maskedPan"] as? String else {
                             result(FlutterError(code: "INVALID_PARAMS", message: "maskedPan is required for physical cards", details: nil))
                             return
                         }
-                        changed = try await self.hasham.changePIN(from: vc, maskedPan: maskedPan)
+                        changed = try await self.hasham.changePIN(from: vc, maskedPan: maskedPan, theme: changeTheme)
                     default:
                         result(FlutterError(code: "INVALID_PARAMS", message: "Unknown cardType: \(cardType)", details: nil))
                         return
@@ -171,6 +173,72 @@ public class HashamMobileSdkPlugin: NSObject, FlutterPlugin {
             top = presented
         }
         return top
+    }
+
+    private func pinTheme(from map: [String: Any]?) -> PinTheme {
+        guard let map = map else { return PinTheme() }
+        var theme = PinTheme()
+        if let c = map["colors"] as? [String: Any] {
+            theme.colors = PinTheme.Colors(
+                primary:       uiColor(from: c["primary"] as? String)       ?? theme.colors.primary,
+                background:    uiColor(from: c["background"] as? String)    ?? theme.colors.background,
+                keyBackground: uiColor(from: c["keyBackground"] as? String) ?? theme.colors.keyBackground,
+                keyText:       uiColor(from: c["keyText"] as? String)       ?? theme.colors.keyText,
+                dotFilled:     uiColor(from: c["dotFilled"] as? String)     ?? theme.colors.dotFilled,
+                dotEmpty:      uiColor(from: c["dotEmpty"] as? String)      ?? theme.colors.dotEmpty,
+                titleColor:    uiColor(from: c["titleColor"] as? String)    ?? theme.colors.titleColor,
+                subtitleColor: uiColor(from: c["subtitleColor"] as? String) ?? theme.colors.subtitleColor
+            )
+        }
+        if let t = map["typography"] as? [String: Any] {
+            theme.typography = PinTheme.Typography(
+                titleSize:    (t["titleSize"] as? CGFloat)    ?? theme.typography.titleSize,
+                subtitleSize: (t["subtitleSize"] as? CGFloat) ?? theme.typography.subtitleSize,
+                keySize:      (t["keySize"] as? CGFloat)      ?? theme.typography.keySize,
+                fontName:     t["fontFamily"] as? String
+            )
+        }
+        if let s = map["shape"] as? [String: Any] {
+            let keyShape: PinTheme.Shape.KeyShape
+            switch s["keyShape"] as? String {
+            case "rounded": keyShape = .rounded
+            case "square":  keyShape = .square
+            default:        keyShape = .circle
+            }
+            theme.shape = PinTheme.Shape(
+                keyShape:     keyShape,
+                cornerRadius: (s["cornerRadius"] as? CGFloat) ?? theme.shape.cornerRadius
+            )
+        }
+        if let s = map["strings"] as? [String: Any] {
+            theme.strings = PinTheme.Strings(
+                title:    s["title"] as? String    ?? theme.strings.title,
+                subtitle: s["subtitle"] as? String ?? theme.strings.subtitle
+            )
+        }
+        return theme
+    }
+
+    private func uiColor(from hex: String?) -> UIColor? {
+        guard var h = hex else { return nil }
+        if h.hasPrefix("#") { h.removeFirst() }
+        guard h.count == 6 || h.count == 8 else { return nil }
+        var rgb: UInt64 = 0
+        Scanner(string: h).scanHexInt64(&rgb)
+        if h.count == 6 {
+            return UIColor(
+                red:   CGFloat((rgb >> 16) & 0xFF) / 255,
+                green: CGFloat((rgb >> 8)  & 0xFF) / 255,
+                blue:  CGFloat(rgb         & 0xFF) / 255,
+                alpha: 1
+            )
+        }
+        return UIColor(
+            red:   CGFloat((rgb >> 16) & 0xFF) / 255,
+            green: CGFloat((rgb >> 8)  & 0xFF) / 255,
+            blue:  CGFloat(rgb         & 0xFF) / 255,
+            alpha: CGFloat((rgb >> 24) & 0xFF) / 255
+        )
     }
 
     private func flutterError(from error: Error) -> FlutterError {

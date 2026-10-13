@@ -31,8 +31,11 @@ class HashamMethodChannel extends HashamMobilePlatform {
   }
 
   @override
-  Future<String> capturePIN(String pan) async {
-    final block = await _channel.invokeMethod<String>('capturePIN', {'pan': pan});
+  Future<String> capturePIN(String pan, {PinTheme? theme}) async {
+    final block = await _channel.invokeMethod<String>('capturePIN', {
+      'pan': pan,
+      if (theme != null) 'theme': theme.toMap(),
+    });
     return block!;
   }
 

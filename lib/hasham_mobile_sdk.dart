@@ -1,5 +1,7 @@
 export 'src/hasham_platform_interface.dart'
-    show HashamConfig, ChangePINParams, ChangePINResult, SignResult;
+    show HashamConfig, ChangePINParams, ChangePINResult, SignResult,
+         PinTheme, PinThemeColors, PinThemeTypography, PinThemeShape,
+         PinThemeStrings, PinKeyShape;
 
 import 'dart:convert';
 import 'src/hasham_platform_interface.dart';
@@ -41,8 +43,8 @@ class HashamMobileSDK {
   ///
   /// Returns a 16-char hex ISO-0 PIN block encrypted with the device working key.
   /// Throws a [PlatformException] with code "CANCELLED" if the user dismisses the overlay.
-  static Future<String> capturePIN(String pan) =>
-      HashamMobilePlatform.instance.capturePIN(pan);
+  static Future<String> capturePIN(String pan, {PinTheme? theme}) =>
+      HashamMobilePlatform.instance.capturePIN(pan, theme: theme);
 
   /// Multi-step PIN change overlay — optional PAN collection, then old PIN → new PIN → confirm.
   ///
